@@ -100,5 +100,3 @@ lint/tmp/
 # lint/reports/
 
 gas-report.txt
-node_modules/
-node_modules
