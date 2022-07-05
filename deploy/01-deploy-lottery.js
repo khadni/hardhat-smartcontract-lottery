@@ -56,4 +56,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   log("-----------------------------");
 };
 
-module.exports.tags = ["all", "raffle"];
+module.exports.tags = ["all", "lottery"];
+
+// deployed at 0xf836bec547AB84571bD5F14B0f896cf6355f9007

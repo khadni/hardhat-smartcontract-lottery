@@ -5,7 +5,7 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
-error Lottery__NotEnoughETHEntered();
+error Lottery__SendMoreToEnterLottery();
 error Lottery__TransferFailed();
 error Lottery__NotOpen();
 error Lottery__UpkeepNotNeeded(uint256 currentBalance, uint256 numPlayers, uint256 lotteryState);
@@ -35,7 +35,7 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface{
     uint256 private immutable i_interval;
 
     /* Events */
-    event lotteryEnter(address indexed player);
+    event LotteryEnter(address indexed player);
     event RequestedLotteryWinner(uint256 indexed requestId);
     event WinnerPicked(address indexed winner);
     
@@ -53,11 +53,11 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface{
     
     // Enter the lottery
     function enterLottery() public payable {
-        if(msg.value < s_entranceFee){revert Lottery__NotEnoughETHEntered();}
+        if(msg.value < s_entranceFee){revert Lottery__SendMoreToEnterLottery();}
         s_players.push(payable(msg.sender));
         if(s_lotteryState != LotteryState.OPEN){revert Lottery__NotOpen();}
         // Events
-        emit lotteryEnter(msg.sender);
+        emit LotteryEnter(msg.sender);
     }
 
     function checkUpkeep(bytes memory /* checkData */) public override returns (bool upkeepNeeded, bytes memory /* performData */){
@@ -96,35 +96,41 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface{
         emit WinnerPicked(recentWinner);
     }
 
-    /* View/pure functions */
-    function getEntranceFee() public view returns(uint256){
-        return s_entranceFee;
-    }
-    function getPlayer(uint256 index) public view returns(address){
-        return s_players[index];
-    }
+    //* Getter funcs * //
 
-    function getRecentWinner() public view returns(address){
-        return s_recentWinner;
-    }
-
-    function getLotteryState() public view returns(LotteryState){
+    function getLotteryState() public view returns (LotteryState) {
         return s_lotteryState;
     }
 
-    function getNumWords() public pure returns(uint256){
+    function getNumWords() public pure returns (uint256) {
         return NUM_WORDS;
     }
 
-    function getNumberOfPlayers() public view returns(uint256){
-        return s_players.length;
+    function getRequestConfirmations() public pure returns (uint256) {
+        return REQUEST_CONFIRMATIONS;
     }
 
-    function getLatestTimeStamp() public view returns(uint256){
+    function getRecentWinner() public view returns (address) {
+        return s_recentWinner;
+    }
+
+    function getPlayer(uint256 index) public view returns (address) {
+        return s_players[index];
+    }
+
+    function getLastTimeStamp() public view returns (uint256) {
         return s_lastTimeStamp;
     }
 
-    function getRequestConfirmations() public pure returns(uint256){
-        return REQUEST_CONFIRMATIONS;
+    function getInterval() public view returns (uint256) {
+        return i_interval;
+    }
+
+    function getEntranceFee() public view returns (uint256) {
+        return s_entranceFee;
+    }
+
+    function getNumberOfPlayers() public view returns (uint256) {
+        return s_players.length;
     }
 }
