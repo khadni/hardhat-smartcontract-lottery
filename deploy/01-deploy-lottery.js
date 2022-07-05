@@ -3,6 +3,7 @@ const {
   developmentChains,
   networkConfig,
 } = require("../helper-hardhat-config");
+const { verify } = require("../helper-hardhat-config");
 
 const VRF_SUB_FUND_AMOUNT = ethers.utils.parseEther("5");
 
@@ -17,10 +18,10 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
       "VRFCoordinatorV2Mock"
     );
     vrfCoordinatorV2Address = VRFCoordinatorV2Mock.address;
-    const transactionResponse = await vrfCoordinatorV2Mock.createSubscription();
+    const transactionResponse = await VRFCoordinatorV2Mock.createSubscription();
     const transactionReceipt = await transactionResponse.wait(1);
     subscriptionId = transactionReceipt.events[0].args.subId;
-    await vrfCoordinatorV2Mock.fundSubscription(
+    await VRFCoordinatorV2Mock.fundSubscription(
       subscriptionId,
       VRF_SUB_FUND_AMOUNT
     );
@@ -40,7 +41,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     callbackGasLimit,
     interval,
   ];
-  const lottery = await deploy("lottery", {
+  const lottery = await deploy("Lottery", {
     from: deployer,
     args: args,
     log: true,
@@ -48,4 +49,11 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     waitConfirmations: network.config.blockConfirmations || 1,
   });
   log(`Lottery deployed at ${lottery.address}`);
+  if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API) {
+    log("Verifying....");
+    await verify(lottery.address, args);
+  }
+  log("-----------------------------");
 };
+
+module.exports.tags = ["all", "raffle"];
