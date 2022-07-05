@@ -69,7 +69,7 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface{
     }
 
     function performUpkeep(bytes calldata /* performData */) external override {
-        (bool performUpkeep, ) = checkUpkeep("");
+        (bool upkeepNeeded, ) = checkUpkeep("");
         if(!upkeepNeeded){revert Lottery__UpkeepNotNeeded(address(this).balance, s_players.length, uint256(s_lotteryState));}
         s_lotteryState = LotteryState.CALCULATING;
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
@@ -110,5 +110,21 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface{
 
     function getLotteryState() public view returns(LotteryState){
         return s_lotteryState;
+    }
+
+    function getNumWords() public pure returns(uint256){
+        return NUM_WORDS;
+    }
+
+    function getNumberOfPlayers() public view returns(uint256){
+        return s_players.length;
+    }
+
+    function getLatestTimeStamp() public view returns(uint256){
+        return s_lastTimeStamp;
+    }
+
+    function getRequestConfirmations() public pure returns(uint256){
+        return REQUEST_CONFIRMATIONS;
     }
 }
