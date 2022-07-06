@@ -6,6 +6,8 @@ require("hardhat-gas-reporter");
 require("hardhat-contract-sizer");
 require("dotenv").config();
 
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+
 module.exports = {
   defaultNetwork: "hardhat",
   networks: {
@@ -27,6 +29,11 @@ module.exports = {
     },
     player: {
       default: 1,
+    },
+  },
+  etherscan: {
+    apiKey: {
+      rinkeby: ETHERSCAN_API_KEY,
     },
   },
 };
